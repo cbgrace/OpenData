@@ -14,8 +14,6 @@ Methods:
         attempts to establish a connection with the database located at DATABASE_PATH (imported from config)
     get_cursor(connection):
         creates a cursor for the connection from get_connection()
-    close_connection(connection):
-        closes the connection.
     execute(query, params=None):
         attempts to execute a query, with optional params, using get_connection() and get_cursor().
 """
@@ -55,17 +53,6 @@ def get_cursor(connection):
         yield cursor
     finally:
         cursor.close()
-
-
-def close_connection(connection):  # I don't think I need this.
-    """
-    method to close the connection
-    :param connection: the specific connection to close
-    :return: no return, just closes the connection using the .close() method, and logs that the database is closed.
-    """
-    if connection:
-        connection.close()
-        logger.info("Database connection closed.")
 
 
 def execute(query, params=None):

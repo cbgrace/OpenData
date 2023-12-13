@@ -1,6 +1,7 @@
 import requests
-# from config import API_KEY
-# from exceptions import DalException
+from config import API_KEY
+from exceptions import DalException
+from logging_config import get_logger
 from abc import ABC, abstractmethod
 
 
@@ -19,6 +20,7 @@ Constants:
     DOMAIN_ENDPOINT: 
     
 """
+logger = get_logger(__name__)
 
 URL = "https://api.gsa.gov/analytics/dap/v1.1"
 REPORTS_ENDPOINT = "/reports/1/data"  # /reports/<report name>/data
@@ -67,6 +69,19 @@ class OpenDataAPIAdapter(APIAdapter):
     def get_data(self, report_name: str, agency_name: str, header: dict, params=None):
         url = f"{self.connection.base_url}{self.fix_endpoint(report_name, agency_name)}"
         return self.send_request(url, headers=header, params=params)
+
+
+def make_request(report_name: str, agency_name: str, params=None):
+    try:
+        factory = RestAPIConnectionFactory()
+        connection = factory.create_connection(OpenDataAPIAdapter.BASE_URL)
+        adapter = OpenDataAPIAdapter(connection)
+        headers = {'x-api-key': API_KEY}
+        response = adapter.get_data(report_name, agency_name, headers, params)
+        return response
+    except Exception as e:
+        logger.error(f"Ran into an error trying to make API request: {e}")
+        raise DalException
 
 
 # For testing...

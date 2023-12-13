@@ -44,3 +44,4 @@ def run():
     agency_name = get_agency_name()
     date = get_date(report_name, agency_name)
     print(report_name, agency_name, date)
+    return report_name, agency_name, date
