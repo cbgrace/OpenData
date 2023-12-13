@@ -1,4 +1,7 @@
 """
+import requests
+from config import API_KEY
+
 
 url = "https://api.gsa.gov/analytics/dap/v1.1"
 endpoint_one = "/reports/<report name>/data"
