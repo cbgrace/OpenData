@@ -15,6 +15,7 @@ def save_json_to_txt(report_name: str, agency_name: str, date: str, json_data):
                 for line in json_data:
                     file.write(f"{line}\n")
             logger.info(f"It seems data has been successfully written to database/{file_name}")
+            return file_name
         except Exception as e:
             logger.error(f"Ran into some exception: {e}")
             raise DalException
@@ -23,8 +24,7 @@ def save_json_to_txt(report_name: str, agency_name: str, date: str, json_data):
         raise DalException
 
 
-def read_from_txt(report_name: str, agency_name: str, date: str):
-    file_name = build_file_name(report_name, agency_name, date)
+def read_from_txt(file_name) -> list:
     if check_if_file_exists(file_name):
         try:
             data_list = []

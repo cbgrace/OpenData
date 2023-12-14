@@ -92,7 +92,7 @@ def check_if_table_exists(table_name):
         if len(count) > 0:
             logger.info(f'Table "{table_name}" exists')
             return True
-        else:  # this will never work, should I leave it here anyway?
+        else:  # this is essentially unreachable code, should I leave it here anyway?
             logger.info(f"Table '{table_name}' did not exist")
             return False
     except Exception as e:

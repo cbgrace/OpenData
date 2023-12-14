@@ -54,3 +54,12 @@ def check_agency_list(user_string: str) -> bool:
         return True
     else:
         return False
+
+
+def get_yes_or_no(message: str) -> str:
+    response = input(message).upper()
+    valid_responses = ["YES", "NO"]
+    while response not in valid_responses:
+        response = input(message).upper()
+    return response
+
