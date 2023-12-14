@@ -20,3 +20,7 @@ if __name__ == '__main__':
         response = response.json()
         db_service.insert_search_data(agency_name, report_name, date)
         dal.save_json_to_txt(report_name, agency_name, date, response)
+    else:
+        data = dal.read_from_txt(report_name, agency_name, date)
+        for line in data:
+            print(line)

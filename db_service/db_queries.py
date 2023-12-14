@@ -28,7 +28,6 @@ SEARCH_DB = """
 
 def insert_search_data(report_name: str, agency_name: str, date: str):
     try:
-        logger.info("checking to see if database exists...")  # TODO remove this logging
         # need to build the file name:
         file_name = build_file_name(report_name, agency_name, date)
         # first, test if the database has been created (this function will create the file if not)
@@ -56,13 +55,16 @@ def search_for_match(report_name: str, agency_name: str, date: str):
     """
     try:
         if not check_if_file_exists(DATABASE_PATH):
+            logger.info("Determined no database file exists.")
             # if there is no db file, then no searches have been made...
             return False
         if not check_if_table_exists('search_history'):
+            logger.info("Determined no table 'search_history' exists w/in db.")
             # same here, if not table, no searches, return false
             return False
         file_name = execute(SEARCH_DB, (report_name, agency_name, date))
-        return file_name
+        logger.info(f"Successfully found file name: {file_name}")  # this returns an empty list in the logs
+        return file_name                                           # but seems to work anyway, strange...
     except DalException:
         raise
     except Exception as e:
@@ -87,10 +89,10 @@ def check_if_file_exists(file_path: str):
 def check_if_table_exists(table_name):
     try:
         count = execute(f"SELECT COUNT(*) FROM {table_name};")
-        if count > 0:
+        if len(count) > 0:
             logger.info(f'Table "{table_name}" exists')
             return True
-        else:
+        else:  # this will never work, should I leave it here anyway?
             logger.info(f"Table '{table_name}' did not exist")
             return False
     except Exception as e:
