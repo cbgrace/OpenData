@@ -55,9 +55,6 @@ def search_for_match(report_name: str, agency_name: str, date: str):
     :return: returns False if no match, returns file name of previous search if match is found.
     """
     try:
-        # since this will run first every time, I suppose it is at least necessary to also check for db/table here
-        # it would probably be ok to only check if file exists here, and not in the above method...
-        # but I will have to think on it.
         if not check_if_file_exists(DATABASE_PATH):
             # if there is no db file, then no searches have been made...
             return False
@@ -88,7 +85,6 @@ def check_if_file_exists(file_path: str):
 
 
 def check_if_table_exists(table_name):
-    logger.info("Checking if table exists...")  # TODO remove some of these logs
     try:
         count = execute(f"SELECT COUNT(*) FROM {table_name};")
         if count > 0:
@@ -99,4 +95,4 @@ def check_if_table_exists(table_name):
             return False
     except Exception as e:
         logger.error(f"Ran into an error trying to check if table {table_name} exists: {e}")
-        return False
+        return False  # this functionality didn't work how I wanted, so I had to return false on error too...
