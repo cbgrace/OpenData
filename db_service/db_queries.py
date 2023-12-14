@@ -63,8 +63,12 @@ def search_for_match(report_name: str, agency_name: str, date: str):
             # same here, if not table, no searches, return false
             return False
         file_name = execute(SEARCH_DB, (report_name, agency_name, date))
-        logger.info(f"Successfully found file name: {file_name}")  # this returns an empty list in the logs
-        return file_name                                           # but seems to work anyway, strange...
+        if file_name == []:
+            logger.info("File name does not exist in db")
+            return False
+        else:  # file name was found... I hope!
+            logger.info(f"Successfully found file name: {file_name}")
+            return file_name[0][0]
     except DalException:
         raise
     except Exception as e:

@@ -97,11 +97,24 @@ class NewData(Data):
 
     def parse_response(self, bundle: dict, response):
         try:
-            file_name = dal.save_json_to_txt(bundle['report_name'], bundle['agency_name'], bundle['date'], response)
-            data_list = dal.read_from_txt(file_name)
-            return presentation_layer.on_new_data(file_name, data_list)
+            parsed_response = []
+            for line in response:
+                if line['date'] == bundle['date']:
+                    parsed_response.append(line)
+            file_name = dal.save_json_to_txt(bundle['report_name'], bundle['agency_name'], bundle['date'],
+                                             parsed_response)
+            return self.return_response(file_name)
         except DalException:
             logger.error("Ran into exception (already logged)")
+            raise BusinessLogicException
+
+    def return_response(self, file_name):
+        try:
+            data_list = dal.read_from_txt(file_name)
+            return presentation_layer.on_new_data(file_name, data_list)
+        except DalException as dal_err:
+            logger.error("Ran into exception (already logged)")
+            presentation_layer.on_error(f"{dal_err}")
             raise BusinessLogicException
 
 
@@ -110,6 +123,7 @@ class ExistingData(Data):
         try:
             data_list = dal.read_from_txt(bundle['file_name'])
             return presentation_layer.on_old_data(bundle['file_name'], data_list)
-        except DalException:
+        except DalException as dal_err:
             logger.error("Ran into exception (already logged)")
+            presentation_layer.on_error(f"{dal_err}")
             raise BusinessLogicException
