@@ -77,6 +77,8 @@ def on_error(error_message=None):
 
 
 def display_results(data_list):
+    if len(data_list) == 0:
+        print("Looks like there was no data.")
     for line in data_list:
         print(f"{line}")
     restart_program_check()
@@ -98,18 +100,21 @@ def list_options(which_option):
 
 
 def print_by_four(list):
+    print()  # just for a newline
+    old_list = list.copy()
     new_list = []
-    while len(list) >= 4:
-        new_list.append(list[0])
-        list.remove(list[0])
+    while len(old_list) >= 4:
+        new_list.append(old_list[0])
+        old_list.remove(old_list[0])
         if len(new_list) == 4:
-            print(f"{new_list[0]}, {new_list[1]}, {new_list[2]}, {new_list[3]}")
+            print(f"{new_list[0]}, {new_list[1]}, {new_list[2]}, {new_list[3]},")
             new_list.clear()
     # empty out the new list -- there is a better way to do this I will figure it out...
     if len(new_list) > 0:
         print("".join([f"{item}, " for item in new_list]))
     # else there are less than 4 items left, print them all!
-    print("".join([f"{item}, " for item in list]))
+    print("".join([f"{item}, " for item in old_list]))
+    print()  # just for a newline
 
 
 def run():

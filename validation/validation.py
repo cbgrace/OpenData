@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 REPORTS_LIST = ["download", "traffic-source", "device-model", "domain", "site", "second-level-domain",
     "language", "os-browser", "windows-browser", "browser", "windows-ie", "os", "windows", "ie", "device"]
@@ -21,6 +21,8 @@ def is_valid_date(date_string: str) -> bool:
     try:
         date_obj = datetime.strptime(date_string, '%Y-%m-%d')
         today = datetime.today()
+        if date_obj < (today - timedelta(days=7)):
+            print("\n### Warning, API is currently only returning results for the last 7 days! ###\n")
         return date_obj <= today
     except ValueError:
         return False
