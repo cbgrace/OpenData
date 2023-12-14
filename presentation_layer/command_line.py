@@ -1,3 +1,4 @@
+import business
 import validation
 
 
@@ -52,8 +53,13 @@ def on_new_data(file_name=None, data_list=None):
             display_results(data_list)
 
 
-def on_old_data():
-    pass
+def on_old_data(file_name, data_list):
+    print(f"This data has been retrieved before, it exists in file: {file_name}")
+    user_response = validation.get_yes_or_no("Would you like to print the data? :  ")
+    if user_response == "NO":
+        restart_program_check()
+    elif user_response == "YES":
+        display_results(data_list)
 
 
 def display_results(data_list):
@@ -71,12 +77,7 @@ def restart_program_check():
 
 
 def run():
-    """
-    just for testing right now...
-    :return:
-    """
     report_name = get_report_name()
     agency_name = get_agency_name()
     date = get_date(report_name, agency_name)
-    print(report_name, agency_name, date)
-    return report_name, agency_name, date
+    return business.check_current_files(report_name, agency_name, date)

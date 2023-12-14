@@ -28,6 +28,7 @@ def check_current_files(report_name: str, agency_name: str, date: str):
 
 def evaluate_file_name(bundle: dict):
     if bundle['file_name'] == False:  # no file exists
+        presentation_layer.on_new_data()
         new_data = NewDataFactory()
         return use_factory(new_data, bundle)
     else:  # data has already been retrieved from api
@@ -99,9 +100,16 @@ class NewData(Data):
             file_name = dal.save_json_to_txt(bundle['report_name'], bundle['agency_name'], bundle['date'], response)
             data_list = dal.read_from_txt(file_name)
             return presentation_layer.on_new_data(file_name, data_list)
-
+        except DalException:
+            logger.error("Ran into exception (already logged)")
+            raise BusinessLogicException
 
 
 class ExistingData(Data):
     def get_data(self, bundle: dict):
-        pass
+        try:
+            data_list = dal.read_from_txt(bundle['file_name'])
+            return presentation_layer.on_old_data(bundle['file_name'], data_list)
+        except DalException:
+            logger.error("Ran into exception (already logged)")
+            raise BusinessLogicException
