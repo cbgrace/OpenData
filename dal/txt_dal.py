@@ -13,7 +13,7 @@ def save_json_to_txt(report_name: str, agency_name: str, date: str, json_data):
             logger.info(f"Attempting to write data to a new file: {file_name}")
             with open(file_name, 'w', newline='') as file:
                 for line in json_data:
-                    file.write(line)
+                    file.write(f"{line}\n")
             logger.info(f"It seems data has been successfully written to database/{file_name}")
         except Exception as e:
             logger.error(f"Ran into some exception: {e}")
