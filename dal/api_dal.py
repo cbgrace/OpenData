@@ -64,14 +64,24 @@ class OpenDataAPIAdapter(APIAdapter):
 
 
 def make_request(report_name: str, agency_name: str, params=None):
+    factory = RestAPIConnectionFactory()
+    connection = factory.create_connection(OpenDataAPIAdapter.BASE_URL)
+    adapter = OpenDataAPIAdapter(connection)
+    headers = {'x-api-key': API_KEY}
     try:
-        factory = RestAPIConnectionFactory()
-        connection = factory.create_connection(OpenDataAPIAdapter.BASE_URL)
-        adapter = OpenDataAPIAdapter(connection)
-        headers = {'x-api-key': API_KEY}
         response = adapter.get_data(report_name, agency_name, headers, params)
-        return response
-    except Exception as e:
-        logger.error(f"Ran into an error trying to make API request: {e}")
+        if response.status_code == 200:
+            return response
+        else:
+            logger.error("Bad response code from API")
+            raise DalException
+    except requests.Timeout as time_out:
+        logger.error(f"Request timed out: {time_out}")
+        raise DalException
+    except requests.ConnectionError as connection_error:
+        logger.error(f"Connection failed: {connection_error}")
+        raise DalException
+    except requests.RequestException as e:
+        logger.error(f"Request failed: {e}")
         raise DalException
 
