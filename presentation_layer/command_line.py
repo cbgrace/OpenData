@@ -182,7 +182,7 @@ def print_by_four(list):
 def run():
     """
     This is the function to call in main to start the program.
-    :return: calls either business.check_current_files() or on_error()
+    :return: calls either business.check_current_files(), or on_error()
     """
     report_name = get_report_name()
     if report_name == "LIST":
