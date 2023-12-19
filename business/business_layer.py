@@ -6,6 +6,42 @@ import presentation_layer
 from exceptions import DalException, BusinessLogicException
 from logging_config import get_logger
 
+"""
+This module contains classes and methods to act as an intermediary between the data access layer and the 
+presentation layer. 
+
+Methods:
+--------
+    check_current_files(report_name: str, agency_name: str, date: str):
+        Searches for a report in the search_log.db
+    evaluate_file_name(bundle: dict):
+        Creates either a NewDataFactory or a ExistingDataFactory class, based on weather there is a file name in 
+        bundle['file_name'], or if it is set to false.
+    bundle_to_dict(report_name: str, agency_name: str, date: str, file_name) -> dict:
+        Creates a dict with report_name, agency_name, date and file_name inside
+    build_date_params(date: str) -> dict:
+        Builds date params for the API query, using today as the 'before' param and the date the user is searching for as 
+        the 'after'
+    use_factory(factory, bundle: dict):
+        Calls the get_data method for the given factory type (either NewData or ExistingData) 
+    
+Classes:
+--------
+    DataFactory(ABC):
+        Abstract class representing a data factory
+    NewDataFactory(DataFactory):
+        Class to instantiate a NewData class
+    ExistingDataFactory(DataFactory):
+        Class to instantiate a ExistingData class
+    Data(ABC):
+        Abstract class representing data
+    NewData(Data):
+        Class to hold methods that execute when the user is searching for data that is not already in our database
+    ExistingData(Data):
+        Class that holds methods that execute when the user is searching for data that is already in our database
+            
+"""
+
 logger = get_logger(__name__)
 
 
@@ -27,7 +63,13 @@ def check_current_files(report_name: str, agency_name: str, date: str):
 
 
 def evaluate_file_name(bundle: dict):
-    if bundle['file_name'] == False:  # no file exists
+    """
+    Creates either a NewDataFactory or a ExistingDataFactory class, based on weather there is a file name in
+        bundle['file_name'], or if it is set to false.
+    :param bundle: a dict containing report_name, agency_name, date & file_name
+    :return: calls use_factory
+    """
+    if not bundle['file_name']:  # no file exists
         presentation_layer.on_new_data()
         new_data = NewDataFactory()
         return use_factory(new_data, bundle)
@@ -37,6 +79,14 @@ def evaluate_file_name(bundle: dict):
 
 
 def bundle_to_dict(report_name: str, agency_name: str, date: str, file_name) -> dict:
+    """
+    Creates a dict with report_name, agency_name, date and file_name inside
+    :param report_name: the report name the user is searching for
+    :param agency_name: the agency name the user is searching for
+    :param date: the date the user is searching for
+    :param file_name: the file name (either false if there is no file or the file name if data already exists)
+    :return: the dict that has been created out of the above params.
+    """
     return {'report_name': report_name,
             'agency_name': agency_name,
             'date': date,
@@ -44,12 +94,24 @@ def bundle_to_dict(report_name: str, agency_name: str, date: str, file_name) -> 
 
 
 def build_date_params(date: str) -> dict:
+    """
+    Builds date params for the API query, using today as the 'before' param and the date the user is searching for as
+        the 'after'
+    :param date: the date the user is searching for
+    :return: the params dict
+    """
     today = datetime.today().date()
     params = {'before': f"{today}", 'after': f"{date}"}
     return params
 
 
 def use_factory(factory, bundle: dict):
+    """
+    Calls the get_data method for the given factory type (either NewData or ExistingData)
+    :param factory: the factory class that needs to be instantiated
+    :param bundle: the bundle of search params from the command line
+    :return: calls get_data method
+    """
     data = factory.set_data_type()
     return data.get_data(bundle)
 
@@ -63,11 +125,19 @@ class DataFactory(ABC):
 
 class NewDataFactory(DataFactory):
     def set_data_type(self):
+        """
+        Instantiates NewData()
+        :return: NewData()
+        """
         return NewData()
 
 
 class ExistingDataFactory(DataFactory):
     def set_data_type(self):
+        """
+        Instantiates ExistingData()
+        :return: ExistingData()
+        """
         return ExistingData()
 
 
@@ -79,6 +149,11 @@ class Data(ABC):
 
 class NewData(Data):
     def get_data(self, bundle: dict):
+        """
+        Retrieves API response from the dal, calls log_data_to_db, passes response to parse_response
+        :param bundle: dict of search parameters from the command line
+        :return: calls self.parse_response
+        """
         try:
             params = build_date_params(bundle['date'])
             response = dal.make_request(bundle['report_name'], bundle['agency_name'], params=params)
@@ -89,6 +164,11 @@ class NewData(Data):
             raise BusinessLogicException
 
     def log_data_to_db(self, bundle: dict):
+        """
+        Upon new data being received from the API, logs the search parameters and file name to search_log.db
+        :param bundle: dict of search params from the user
+        :return: n/a
+        """
         try:
             return db_service.insert_search_data(bundle['report_name'], bundle['agency_name'], bundle['date'])
         except DalException:
@@ -96,6 +176,13 @@ class NewData(Data):
             raise BusinessLogicException
 
     def parse_response(self, bundle: dict, response):
+        """
+        Parses the response to only include items in which the user's searched for date matches the item's date. Also
+            calls a method from the dal to write this data to a txt file.
+        :param bundle: dict of search params from the user
+        :param response: response from the API to write to txt file
+        :return: calls self.return_response
+        """
         try:
             parsed_response = []
             for line in response:
@@ -109,6 +196,11 @@ class NewData(Data):
             raise BusinessLogicException
 
     def return_response(self, file_name):
+        """
+        Reads the data we have just loaded from its newly created txt file to the console.
+        :param file_name: name of txt file to read from
+        :return: n/a
+        """
         try:
             data_list = dal.read_from_txt(file_name)
             return presentation_layer.on_new_data(file_name, data_list)
@@ -120,6 +212,11 @@ class NewData(Data):
 
 class ExistingData(Data):
     def get_data(self, bundle: dict):
+        """
+        Reads data from txt file to the console.
+        :param bundle: dict of search parameters from the
+        :return: n/a
+        """
         try:
             data_list = dal.read_from_txt(bundle['file_name'])
             return presentation_layer.on_old_data(bundle['file_name'], data_list)

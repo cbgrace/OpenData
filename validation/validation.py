@@ -1,5 +1,25 @@
 from datetime import datetime, timedelta
 
+"""
+This module contains methods to validate user entries. 
+
+Methods:
+---------
+    is_valid_date(date_string: str) -> bool:
+        Tests if a string is both a valid date, and is less than or equal to today's date.
+    check_report_list(user_string: str) -> bool:
+        Tests if a user's input is contained within REPORTS_LIST.
+    check_agency_list(user_string: str) -> bool:
+        Tests if a user's input is contained within AGENCY_LIST.
+    get_yes_or_no(message: str) -> str:
+        Retrieves a response of either 'yes' or 'no' from user, will not take any other answer.
+
+Constants:
+-----------
+    REPORTS_LIST: list of available report types
+    AGENCY_LIST: list of agencies from which reports are available
+"""
+
 REPORTS_LIST = ["download", "traffic-source", "device-model", "domain", "site", "second-level-domain",
     "language", "os-browser", "windows-browser", "browser", "windows-ie", "os", "windows", "ie", "device"]
 
@@ -59,6 +79,11 @@ def check_agency_list(user_string: str) -> bool:
 
 
 def get_yes_or_no(message: str) -> str:
+    """
+    Retrieves a response of either 'yes' or 'no' from user, will not take any other answer.
+    :param message: input message to display to user in command line
+    :return: response from user, either 'yes' or 'no'
+    """
     response = input(message).upper()
     valid_responses = ["YES", "NO"]
     while response not in valid_responses:

@@ -5,6 +5,29 @@ from logging_config import get_logger
 import os
 from dal import build_file_name
 
+"""
+This module contains methods to query my sqlite database. 
+
+Methods:
+--------
+    insert_search_data(report_name: str, agency_name: str, date: str):
+        Creates a new entry in the search_history table containing the details for a recently executed search (report name,
+        agency name, date & file name)
+    search_for_match(report_name: str, agency_name: str, date: str):
+        Searches for a report in the search_log.db
+    check_if_file_exists(file_path: str) -> bool:
+        Checks if a given file at file_path exists
+    check_if_table_exists(table_name):
+        Checks if a given table exists in my sqlite3 database.
+
+Constants:
+----------
+    CREATE_TABLE: creates a table called search_history with the listed fields.
+    INSERT_DATA: inserts a new row into the search_history table
+    SEARCH_DB: searches for a file name in the search_history table given a report_name, agency_name & date
+
+"""
+
 logger = get_logger(__name__)
 
 CREATE_TABLE = """
@@ -27,6 +50,14 @@ SEARCH_DB = """
 """
 
 def insert_search_data(report_name: str, agency_name: str, date: str):
+    """
+    Creates a new entry in the search_history table containing the details for a recently executed search (report name,
+        agency name, date & file name)
+    :param report_name: the name of the report the user is searching for
+    :param agency_name: the name of the agency the user is searching for
+    :param date: the date the user is searching for
+    :return: n/a
+    """
     try:
         # need to build the file name:
         file_name = build_file_name(report_name, agency_name, date)
@@ -76,7 +107,12 @@ def search_for_match(report_name: str, agency_name: str, date: str):
         raise DalException
 
 
-def check_if_file_exists(file_path: str):
+def check_if_file_exists(file_path: str) -> bool:
+    """
+    Checks if a given file at file_path exists
+    :param file_path: the path where the file *should* exist
+    :return: false if file does not exist, true if it does
+    """
     try:
         if not os.path.exists(file_path):
             with open(file_path, 'w') as f:
@@ -90,7 +126,12 @@ def check_if_file_exists(file_path: str):
         raise DalException
 
 
-def check_if_table_exists(table_name):
+def check_if_table_exists(table_name) -> bool:
+    """
+    Checks if a given table exists in my sqlite3 database.
+    :param table_name: table name to check
+    :return: true if table exists, false if not
+    """
     try:
         count = execute(f"SELECT COUNT(*) FROM {table_name};")
         if len(count) > 0:
