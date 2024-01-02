@@ -89,7 +89,7 @@ def on_new_data(file_name=None, data_list=None):
     if file_name == None:  # call on_new_data with no params to print this message
         print('This data has not been requested before, getting data...')
     else:
-        print(f"Data retrieved, response saved to: {file_name}")
+        print(f"Data retrieved, response saved to: {file_name} ")
         # check if user wants to print results
         user_response = validation.get_yes_or_no("Would you like to print the data? :  ")
         if user_response == "NO":
@@ -162,7 +162,7 @@ def list_options(which_option):
         print_by_four(validation.AGENCY_LIST)
 
 
-def print_by_four(list):
+def print_by_four(list: list):
     """
     Takes a list and prints it four items at a time
     :param list: list to print
